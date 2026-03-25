@@ -23,14 +23,19 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = async () => {
-    if (!form.email || !form.password || !form.fullName || !form.cpf) {
+    if (
+      form.email === "" ||
+      form.password === "" ||
+      form.fullName === ""||
+      form.cpf === ""
+    ) {
       Alert.alert("Erro", "Preencha todos os campos.");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post("/accounts/register", form); // Ajuste o endpoint se necessário
+      const response = await api.post("/auth/register", form); // Ajuste o endpoint se necessário
 
       Alert.alert("Sucesso!", "Conta JJ Banking criada com sucesso.");
       console.log("Dados da Conta:", response.data);
