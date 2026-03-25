@@ -11,10 +11,15 @@ import { Colors } from "../constants/Colors";
 import { Button } from "../components/Button";
 import { api } from "../services/api";
 import { useRouter } from "expo-router";
+import { isAxiosError } from "axios";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
+  // Estado para erro específico do campo CPF
+  const [cpfError, setCpfError] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -23,29 +28,38 @@ export default function RegisterScreen() {
   });
 
   const handleRegister = async () => {
-    if (
-      form.email === "" ||
-      form.password === "" ||
-      form.fullName === ""||
-      form.cpf === ""
-    ) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+    // Reset de estados iniciais
+    setCpfError(null);
+
+    if (!form.email || !form.password || !form.fullName || !form.cpf) {
+      Alert.alert("Erro", "Preencha todos os campos obrigatórios.");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post("/auth/register", form); // Ajuste o endpoint se necessário
+      const response = await api.post("/auth/register", form);
 
-      Alert.alert("Sucesso!", "Conta JJ Banking criada com sucesso.");
-      console.log("Dados da Conta:", response.data);
+      Alert.alert("Sucesso!", "Conta criada com sucesso.");
+      router.replace("/"); // Ou para a tela de login
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const apiData = error.response?.data;
+        // Pega a mensagem vindo do backend (seja .error ou .message)
+        const message = apiData?.error || apiData?.message || "";
 
-      router.replace("/"); // Volta para a home ou vai para o login
-    } catch (error: any) {
-      Alert.alert(
-        "Erro no Cadastro",
-        error.response?.data?.message || "Ocorreu um erro inesperado.",
-      );
+        // Se a mensagem mencionar CPF, exibe no input, senão usa Alert
+        if (message.toLowerCase().includes("cpf")) {
+          setCpfError(String(message));
+        } else {
+          Alert.alert(
+            "Erro no Cadastro",
+            String(message || "Erro ao processar."),
+          );
+        }
+      } else {
+        Alert.alert("Erro de Conexão", "Não foi possível alcançar o servidor.");
+      }
     } finally {
       setLoading(false);
     }
@@ -63,16 +77,25 @@ export default function RegisterScreen() {
         <TextInput
           style={styles.input}
           placeholder="Ex: Jamerson Silva"
+          value={form.fullName}
           onChangeText={(t) => setForm({ ...form, fullName: t })}
         />
 
         <Text style={styles.label}>CPF (Somente números)</Text>
         <TextInput
-          style={styles.input}
+          // Estilo condicional: se houver erro, aplica borda vermelha
+          style={[styles.input, cpfError ? styles.inputError : null]}
           keyboardType="numeric"
-          placeholder="000.000.000-00"
-          onChangeText={(t) => setForm({ ...form, cpf: t })}
+          maxLength={11}
+          placeholder="00000000000"
+          value={form.cpf}
+          onChangeText={(t) => {
+            setCpfError(null); // Limpa o erro ao digitar
+            setForm({ ...form, cpf: t.replace(/\D/g, "") });
+          }}
         />
+        {/* Mensagem de erro vermelha abaixo do input */}
+        {cpfError && <Text style={styles.errorText}>{cpfError}</Text>}
 
         <Text style={styles.label}>E-mail</Text>
         <TextInput
@@ -80,6 +103,7 @@ export default function RegisterScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
           placeholder="seu@email.com"
+          value={form.email}
           onChangeText={(t) => setForm({ ...form, email: t })}
         />
 
@@ -88,6 +112,7 @@ export default function RegisterScreen() {
           style={styles.input}
           secureTextEntry
           placeholder="Crie uma senha forte"
+          value={form.password}
           onChangeText={(t) => setForm({ ...form, password: t })}
         />
       </View>
@@ -114,11 +139,25 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: "#fff",
     padding: 14,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#DDD",
+    marginBottom: 16, // Espaçamento padrão entre inputs
+  },
+  // Estilo para quando o input tem erro
+  inputError: {
+    borderColor: "#FF3B30",
+    borderWidth: 1.5,
+    marginBottom: 4, // Diminui o margin para o erro ficar colado
+  },
+  // Estilo do texto de erro
+  errorText: {
+    color: "#FF3B30",
+    fontSize: 12,
     marginBottom: 16,
+    marginLeft: 4,
+    fontWeight: "500",
   },
 });

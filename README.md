@@ -9,6 +9,7 @@ O **JJ Banking App** é a interface mobile do ecossistema financeiro JJ, desenvo
 Este aplicativo é o cliente mobile que consome a [JJ Banking API](https://github.com/jamerson-mt/jj-banking-api), permitindo que os usuários gerenciem suas finanças em tempo real.
 
 ### Principais Funcionalidades (Em desenvolvimento)
+
 - [x] Estrutura base com Expo Router.
 - [x] Identidade visual e sistema de cores.
 - [x] Componentes reutilizáveis (Botões, Cards de Saldo).
@@ -33,4 +34,11 @@ Este aplicativo é o cliente mobile que consome a [JJ Banking API](https://githu
 1. **Clone o repositório:**
    ```bash
    git clone https://github.com/jamerson-mt/jjbanking-app.git
+   cd jjbanking-app
+   ```
+
+2. **Install e inicializacao:**
+   ```bash
+   npm install
+   npx expo start
    ```
