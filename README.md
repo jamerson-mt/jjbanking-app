@@ -1,50 +1,36 @@
-# Welcome to your Expo app 👋
+# JJ Banking App 💳
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+O **JJ Banking App** é a interface mobile do ecossistema financeiro JJ, desenvolvida para oferecer uma experiência de usuário fluida, segura e moderna. Este projeto utiliza **React Native** com **Expo Go** para garantir alta performance e facilidade de manutenção em múltiplas plataformas (Android e iOS).
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Sobre o Projeto
 
+Este aplicativo é o cliente mobile que consome a [JJ Banking API](https://github.com/jamerson-mt/jj-banking-api), permitindo que os usuários gerenciem suas finanças em tempo real.
+
+### Principais Funcionalidades (Em desenvolvimento)
+- [x] Estrutura base com Expo Router.
+- [x] Identidade visual e sistema de cores.
+- [x] Componentes reutilizáveis (Botões, Cards de Saldo).
+- [ ] Autenticação com a API (Login/JWT).
+- [ ] Histórico de transações e extrato.
+- [ ] Realização de transferências (PIX).
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Framework:** [React Native](https://reactnative.dev/)
+- **Plataforma:** [Expo Go](https://expo.dev/)
+- **Roteamento:** [Expo Router](https://docs.expo.dev/router/introduction/)
+- **Linguagem:** TypeScript
+- **Estilização:** StyleSheet (Nativo)
+
+---
+
+## ⚙️ Como Executar o Projeto
+
+1. **Clone o repositório:**
    ```bash
-   npm install
+   git clone https://github.com/jamerson-mt/jjbanking-app.git
    ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
