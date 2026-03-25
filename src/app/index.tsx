@@ -9,47 +9,47 @@ export default function Index() {
   const { user, login, isLoading } = useAuth();
 
   return (
-      <View style={styles.content}>
-        {/* Cabeçalho de Identificação */}
-        <View style={styles.header}>
-          <Text style={styles.welcomeText}>
-            {user ? `Olá, ${user.name}!` : "Bem-vindo ao JJ Banking"}
-          </Text>
-          <Text style={styles.dateText}>Quarta-feira, 25 de Março</Text>
-        </View>
-
-        {/* Área Central: Mostra o saldo se logado, ou mensagem de boas-vindas */}
-        <View style={styles.main}>
-          {user ? (
-            <BalanceCard amount={1250.55} />
-          ) : (
-            <View style={styles.placeholderCard}>
-              <Text style={styles.placeholderText}>
-                Faça login para gerenciar suas finanças com segurança.
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Ações na parte inferior */}
-        <View style={styles.footer}>
-          {!user && (
-            <Button 
-              title="Entrar na minha conta" 
-              onPress={login} 
-              loading={isLoading} 
-            />
-          )}
-          
-          {user && (
-            <Button 
-              title="Ir para o Dashboard" 
-              onPress={() => console.log("Navegar para Home")} 
-              variant="secondary"
-            />
-          )}
-        </View>
+    <View style={styles.content}>
+      {/* Cabeçalho de Identificação */}
+      <View style={styles.header}>
+        <Text style={styles.welcomeText}>
+          {user ? `Olá, ${user.name}!` : "Bem-vindo ao JJ Banking"}
+        </Text>
+        <Text style={styles.dateText}>Quarta-feira, 25 de Março</Text>
       </View>
+
+      {/* Área Central: Mostra o saldo se logado, ou mensagem de boas-vindas */}
+      <View style={styles.main}>
+        {user ? (
+          <BalanceCard amount={1250.55} />
+        ) : (
+          <View style={styles.placeholderCard}>
+            <Text style={styles.placeholderText}>
+              Faça login para gerenciar suas finanças com segurança.
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Ações na parte inferior */}
+      <View style={styles.footer}>
+        {!user && (
+          <Button
+            title="Entrar na minha conta"
+            onPress={login}
+            loading={isLoading}
+          />
+        )}
+
+        {user && (
+          <Button
+            title="Ir para o Dashboard"
+            onPress={() => console.log("Navegar para Home")}
+            variant="secondary"
+          />
+        )}
+      </View>
+    </View>
   );
 }
 
