@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "jjbanking",
-    "slug": "jjbanking",
+    "name": "jjbanking-app",
+    "slug": "jjbanking-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "jjbanking",
+    "scheme": "jjbanking-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
