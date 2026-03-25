@@ -9,7 +9,6 @@ export default function Index() {
   const { user, login, isLoading } = useAuth();
 
   return (
-    <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         {/* Cabeçalho de Identificação */}
         <View style={styles.header}>
@@ -51,7 +50,6 @@ export default function Index() {
           )}
         </View>
       </View>
-    </SafeAreaView>
   );
 }
 
