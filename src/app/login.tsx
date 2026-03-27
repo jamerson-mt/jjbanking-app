@@ -35,15 +35,16 @@ export default function LoginScreen() {
       const response = await api.post("/auth/login", form);
 
       // 2. PEGANDO O TOKEN: Supondo que sua API retorne { token: "...", user: {...} }
-      const { token, user } = response.data;
+      const { token, accountNumber, fullName } = response.data;
 
       // 3. SALVANDO NO DISPOSITIVO: Para manter o usuário logado
       await AsyncStorage.setItem("@JJBanking:token", token);
-      await AsyncStorage.setItem("@JJBanking:user", JSON.stringify(user));
+      await AsyncStorage.setItem("@JJBanking:accountNumber", accountNumber);
+      await AsyncStorage.setItem("@JJBanking:fullName", fullName);
 
       Alert.alert(
         "Sucesso",
-        `Bem-vindo de volta, ${user?.fullName || "usuário"}!`,
+        `Bem-vindo de volta, ${fullName || "usuário"}!`,
       );
 
       // 4. NAVEGAÇÃO: Vai para a tela principal (Dashboard)

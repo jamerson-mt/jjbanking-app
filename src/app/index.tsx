@@ -55,8 +55,7 @@ export default function Index() {
             <>
               <Button
                 title="Entrar na minha conta"
-                onPress={login}
-                loading={isLoading}
+                onPress={() => router.push("/login")}
               />
 
               <View style={styles.spacer} />
