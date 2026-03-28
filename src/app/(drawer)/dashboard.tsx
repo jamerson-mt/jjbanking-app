@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,51 +6,33 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // Biblioteca de ícones padrão do Expo
+import { Ionicons } from "@expo/vector-icons";
 
-import { Colors } from "../constants/Colors";
-import { BalanceCard } from "../components/BalanceCard";
+import { Colors } from "../../constants/Colors";
+import { BalanceCard } from "../../components/BalanceCard";
+import { useAuth } from "../../hooks/useAuth"; // Importando o cérebro do app
 
 export default function Dashboard() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState({
-    name: "",
-    account: "",
-  });
+  const { user, isLoading, logout, refreshUser } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const fullName = await AsyncStorage.getItem("@JJBanking:fullName");
-      const accountNumber = await AsyncStorage.getItem(
-        "@JJBanking:accountNumber",
-      );
-
-      setUserData({
-        name: fullName || "Usuário",
-        account: accountNumber || "0000-0",
-      });
-    } catch (error) {
-      console.error("Erro ao carregar dados do cache", error);
-    } finally {
-      setLoading(false);
-    }
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshUser(); // Atualiza os dados do AsyncStorage (e futuramente da API)
+    setRefreshing(false);
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.clear();
-    router.replace("/");
+    await logout();
+    router.replace("/(auth)/login");
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -60,27 +42,33 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header Customizado */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Header Customizado com dados do Hook */}
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>
-              Olá, {userData.name.split(" ")[0]}
+              Olá, {user?.fullName?.split(" ")[0] || "Usuário"}
             </Text>
-            <Text style={styles.accountInfo}>Conta {userData.account}</Text>
+            <Text style={styles.accountInfo}>
+              Agência {user?.branch || "0001"} • Conta {user?.accountNumber || "00000-0"}
+            </Text>
           </View>
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={24} color={Colors.primary} />
+            <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
           </TouchableOpacity>
         </View>
 
-        {/* Card de Saldo */}
+        {/* Card de Saldo Real */}
         <View style={styles.balanceSection}>
-          <BalanceCard amount={1250.55} />
-          {/* Nota: O valor do saldo idealmente viria de um fetch à API /accounts/balance */}
+          <BalanceCard amount={user?.balance ?? 0} />
         </View>
 
-        {/* Atalhos Rápidos (Quick Actions) */}
+        {/* Atalhos Rápidos */}
         <Text style={styles.sectionTitle}>Ações rápidas</Text>
         <ScrollView
           horizontal
@@ -101,25 +89,19 @@ export default function Dashboard() {
           />
         </ScrollView>
 
-        {/* Lista de Atividades Recentes */}
+        {/* Lista de Atividades */}
         <View style={styles.activitySection}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Atividade recente</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/dashboard")}>
               <Text style={styles.seeAll}>Ver tudo</Text>
             </TouchableOpacity>
           </View>
 
           <TransactionItem
-            title="Supermercado Extra"
-            date="Hoje, 14:20"
-            value="- R$ 152,00"
-            type="expense"
-          />
-          <TransactionItem
-            title="Transferência Recebida"
-            date="Ontem, 09:10"
-            value="+ R$ 450,00"
+            title="Abertura de Conta"
+            date="Hoje"
+            value={`+ R$ ${(user?.balance ?? 0).toFixed(2)}`}
             type="income"
           />
         </View>
@@ -128,7 +110,7 @@ export default function Dashboard() {
   );
 }
 
-// Componentes Auxiliares Internos
+// --- Componentes Auxiliares permanecem os mesmos ---
 function QuickAction({ icon, label, color }: any) {
   return (
     <TouchableOpacity style={styles.actionItem}>
@@ -209,7 +191,7 @@ const styles = StyleSheet.create({
   transactionCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.white,
+    backgroundColor: "#FFF",
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,

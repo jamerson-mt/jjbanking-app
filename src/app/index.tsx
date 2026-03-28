@@ -1,20 +1,31 @@
-import React from "react";
-import { Text, View, StyleSheet } from "react-native";
-// Importação correta para evitar o erro de "deprecated"
+import React, { useEffect } from "react";
+import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
-// Seus componentes e hooks
 import { Colors } from "../constants/Colors";
 import { Button } from "../components/Button";
-import { BalanceCard } from "../components/BalanceCard";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/useAuth"; // Certifique-se que este hook lê o AsyncStorage
 
 export default function Index() {
-  const { user, login, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  // Função para formatar a data atual
+  // Redirecionamento Automático: Se já estiver logado, pula a landing
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/(drawer)/dashboard");
+    }
+  }, [user, isLoading, router]); // <-- Adicione o 'router' aqui
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center" }]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
   const formattedDate = new Intl.DateTimeFormat("pt-BR", {
     weekday: "long",
     day: "numeric",
@@ -24,55 +35,36 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        {/* Cabeçalho de Identificação */}
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>
-            {user ? `Olá, ${user.name}!` : "Bem-vindo ao JJ Banking"}
-          </Text>
+          <Text style={styles.welcomeText}>Bem-vindo ao JJ Banking</Text>
           <Text style={styles.dateText}>{formattedDate}</Text>
         </View>
 
-        {/* Área Central: Lógica de exibição de saldo ou boas-vindas */}
         <View style={styles.main}>
-          {user ? (
-            <BalanceCard amount={1250.55} />
-          ) : (
-            <View style={styles.placeholderCard}>
-              <View style={styles.logoPlaceholder}>
-                <Text style={styles.logoInnerText}>JJ</Text>
-              </View>
-              <Text style={styles.placeholderText}>
-                Sua conta digital completa. Faça login para gerenciar suas
-                finanças com segurança.
-              </Text>
+          <View style={styles.placeholderCard}>
+            <View style={styles.logoPlaceholder}>
+              <Text style={styles.logoInnerText}>JJ</Text>
             </View>
-          )}
+            <Text style={styles.placeholderText}>
+              Sua conta digital completa. Faça login para gerenciar suas
+              finanças com segurança na nossa nova plataforma.
+            </Text>
+          </View>
         </View>
 
-        {/* Ações na parte inferior da tela */}
         <View style={styles.footer}>
-          {!user ? (
-            <>
-              <Button
-                title="Entrar na minha conta"
-                onPress={() => router.push("/login")}
-              />
+          <Button
+            title="Entrar na minha conta"
+            onPress={() => router.push("/login")} // Rota corrigida para o grupo
+          />
 
-              <View style={styles.spacer} />
+          <View style={styles.spacer} />
 
-              <Button
-                title="Abrir conta gratuita"
-                onPress={() => router.push("/register")}
-                variant="secondary"
-              />
-            </>
-          ) : (
-            <Button
-              title="Ir para o Dashboard"
-              onPress={() => console.log("Navegar para Home")}
-              variant="secondary"
-            />
-          )}
+          <Button
+            title="Abrir conta gratuita"
+            onPress={() => router.push("/register")} // Rota corrigida
+            variant="secondary"
+          />
         </View>
       </View>
     </SafeAreaView>
@@ -80,44 +72,29 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-  },
-  header: {
-    marginTop: 20,
-    marginBottom: 32,
-  },
-  welcomeText: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: Colors.text,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  content: { flex: 1, paddingHorizontal: 24, paddingBottom: 40 },
+  header: { marginTop: 20, marginBottom: 32 },
+  welcomeText: { fontSize: 26, fontWeight: "bold", color: Colors.text },
   dateText: {
     fontSize: 14,
     color: Colors.gray,
     marginTop: 4,
     textTransform: "capitalize",
   },
-  main: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  main: { flex: 1, justifyContent: "center", alignItems: "center" },
   placeholderCard: {
     padding: 30,
-    backgroundColor: Colors.white,
+    backgroundColor: "#FFF",
     borderRadius: 20,
     alignItems: "center",
     width: "100%",
-    borderStyle: "dashed",
     borderWidth: 1,
-    borderColor: "#CBD5E0",
+    borderColor: "#E2E8F0",
+    elevation: 2, // Sombra leve no Android
+    shadowColor: "#000", // Sombra no iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
   },
   logoPlaceholder: {
     width: 60,
@@ -128,21 +105,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  logoInnerText: {
-    color: Colors.white,
-    fontWeight: "bold",
-    fontSize: 20,
-  },
+  logoInnerText: { color: "#FFF", fontWeight: "bold", fontSize: 20 },
   placeholderText: {
     textAlign: "center",
     color: "#555",
     lineHeight: 22,
     fontSize: 15,
   },
-  footer: {
-    marginTop: "auto",
-  },
-  spacer: {
-    height: 12,
-  },
+  footer: { marginTop: "auto" },
+  spacer: { height: 12 },
 });
