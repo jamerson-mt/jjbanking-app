@@ -7,6 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "jjbanking-app",
     "userInterfaceStyle": "automatic",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "baseUrl": "/jjbanking-app",
+      "favicon": "./assets/images/icon.png"
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -18,15 +24,8 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/icon.png",
-        "backgroundImage": "./assets/images/icon.png",
-        "monochromeImage": "./assets/images/icon.png"
-      },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/icon.png"
+      }
     },
     "plugins": [
       "expo-router",
@@ -36,10 +35,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#ffffff"
         }
       ]
     ],
