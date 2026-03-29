@@ -14,7 +14,8 @@ import { api } from "../../services/api";
 import { useRouter } from "expo-router";
 import { isAxiosError } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { notify } from "../../utils/toast"; // Importe seu utilitário de Toast
+import { notify } from "../../utils/toast";
+import { useAuth } from "../../context/AuthContext"; // 1. Importe o hook
 
 interface RegisterResponse {
   token: string;
@@ -27,6 +28,7 @@ interface RegisterResponse {
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { refreshUser } = useAuth(); // 2. Pegue a função refreshUser
   const [loading, setLoading] = useState(false);
   const [cpfError, setCpfError] = useState<string | null>(null);
 
@@ -55,7 +57,7 @@ export default function RegisterScreen() {
       const response = await api.post<RegisterResponse>("/auth/register", form);
       const data = response.data;
 
-      // Persistência em lote
+      // 3. Persistência em lote
       await AsyncStorage.multiSet([
         ["@JJBanking:token", data.token],
         ["@JJBanking:fullName", data.fullName],
@@ -65,12 +67,15 @@ export default function RegisterScreen() {
         ["@JJBanking:balance", data.balance.toString()],
       ]);
 
-      // Notificação de sucesso no topo
+      // 4. SINCRONIZAÇÃO DO CONTEXTO
+      // Força o AuthContext a carregar os dados que acabamos de salvar
+      await refreshUser();
+
       notify.success(
         `Conta criada! Bem-vindo, ${data.fullName.split(" ")[0]}.`,
       );
 
-      // Redirecionamento para a rota do Drawer
+      // 5. Redirecionamento seguro
       router.replace("/(drawer)/dashboard");
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -81,7 +86,7 @@ export default function RegisterScreen() {
         if (message.toLowerCase().includes("cpf")) {
           setCpfError(String(message));
         } else {
-          notify.error(String(message)); // Toast vermelho em vez de Alert
+          notify.error(String(message));
         }
       } else {
         notify.error("Verifique sua conexão com a internet.");
@@ -158,7 +163,6 @@ export default function RegisterScreen() {
   );
 }
 
-// ... estilos permanecem os mesmos ...
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: 24, paddingTop: 60 },

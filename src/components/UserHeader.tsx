@@ -11,14 +11,17 @@ interface UserHeaderProps {
 }
 
 export const UserHeader = ({ name, branch, account, onLogout }: UserHeaderProps) => {
-  const firstName = name?.split(" ")[0] || "Usuário";
+  // Garante que pegamos o primeiro nome mesmo se o nome vier nulo inicialmente
+  const firstName = name ? name.split(" ")[0] : "Usuário";
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text style={styles.greeting}>Olá, {firstName}</Text>
+      <View style={styles.infoContainer}>
+        <Text style={styles.greeting} numberOfLines={1}>
+          Olá, {firstName}
+        </Text>
         <Text style={styles.accountInfo}>
-          Agência {branch || "0001"} • Conta {account || "00000-0"}
+          Ag {branch || "0001"} • Cc {account || "00000-0"}
         </Text>
       </View>
       
@@ -27,8 +30,9 @@ export const UserHeader = ({ name, branch, account, onLogout }: UserHeaderProps)
           onPress={onLogout} 
           style={styles.logoutButton} 
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // Aumenta a área de toque
         >
-          <Ionicons name="log-out-outline" size={26} color="#FF3B30" />
+          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
         </TouchableOpacity>
       )}
     </View>
@@ -41,14 +45,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingTop: 30, // Espaçamento para não colar no topo
+    paddingTop: 20, 
     paddingBottom: 20,
+    backgroundColor: Colors.background, // Garante que o fundo combine com a Dash
   },
-  greeting: { fontSize: 22, fontWeight: "bold", color: Colors.text },
-  accountInfo: { fontSize: 14, color: Colors.gray, marginTop: 4 },
+  infoContainer: {
+    flex: 1, // Faz os textos ocuparem o espaço disponível sem empurrar o botão de sair
+    marginRight: 15,
+  },
+  greeting: { 
+    fontSize: 24, 
+    fontWeight: "bold", 
+    color: Colors.text,
+    letterSpacing: -0.5,
+  },
+  accountInfo: { 
+    fontSize: 14, 
+    color: Colors.gray, 
+    marginTop: 2,
+    fontWeight: "500",
+  },
   logoutButton: { 
-    padding: 10,
-    backgroundColor: "#FF3B3010", // Fundo levemente avermelhado
-    borderRadius: 12 
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: "#FF3B3010", 
+    borderRadius: 14,
   },
 });

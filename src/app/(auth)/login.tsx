@@ -15,10 +15,12 @@ import { api } from "../../services/api";
 import { useRouter } from "expo-router";
 import { isAxiosError } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { notify } from "../../utils/toast"; // Importando seu novo utilitário
+import { notify } from "../../utils/toast";
+import { useAuth } from "../../context/AuthContext"; // 1. Importe o useAuth
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { refreshUser } = useAuth(); // 2. Pegue a função de atualização
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     email: "",
@@ -27,17 +29,16 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!form.email || !form.password) {
-      notify.error("Preencha e-mail e senha."); // Troca do Alert pelo Toast
+      notify.error("Preencha e-mail e senha.");
       return;
     }
 
     setLoading(true);
     try {
-      // 1. Chamada para a API na VPS
       const response = await api.post("/auth/login", form);
       const data = response.data;
 
-      // 2. Persistência de Dados (Consistente com a Dashboard)
+      // 3. Persistência de Dados
       await AsyncStorage.multiSet([
         ["@JJBanking:token", data.token],
         ["@JJBanking:fullName", data.fullName],
@@ -47,10 +48,13 @@ export default function LoginScreen() {
         ["@JJBanking:balance", data.balance.toString()],
       ]);
 
-      // Feedback visual positivo (Verde)
+      // 4. ATUALIZAÇÃO DO CONTEXTO (O PULO DO GATO)
+      // Isso faz o useAuth ler o AsyncStorage AGORA e preencher o 'user'
+      await refreshUser();
+
       notify.success(`Bem-vindo de volta, ${data.fullName.split(" ")[0]}!`);
 
-      // 3. Navegação direta para a rota do Drawer
+      // 5. Agora sim, redireciona com o estado populado
       router.replace("/(drawer)/dashboard");
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -58,8 +62,6 @@ export default function LoginScreen() {
           error.response?.data?.message ||
           error.response?.data?.error ||
           "E-mail ou senha incorretos.";
-        
-        // Exibe erro vindo da API no topo (Vermelho)
         notify.error(String(message));
       } else {
         notify.error("Não foi possível conectar ao servidor da JJ Banking.");

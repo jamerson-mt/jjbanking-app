@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TextInput, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  KeyboardAvoidingView, 
+  Platform, 
+  TouchableWithoutFeedback, 
+  Keyboard 
+} from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "../../constants/Colors";
@@ -14,6 +25,7 @@ export default function DepositScreen() {
   const { user, refreshUser } = useAuth();
 
   const handleDeposit = async () => {
+    // Converte a vírgula em ponto para o parseFloat entender
     const amount = parseFloat(value.replace(",", "."));
 
     if (isNaN(amount) || amount <= 0) {
@@ -24,26 +36,25 @@ export default function DepositScreen() {
     setLoading(true);
 
     try {
-      // 1. Chamada API
+      // 1. Chamada API para o seu Backend C#
       await api.post("/transaction/deposit", {
         AccountId: user?.accountId, 
         Amount: amount,
         Description: "Depósito via App JJ Banking",
       });
 
-      // 2. Aguarda a sincronização real (Isso atualiza o estado global)
+      // 2. Atualiza o estado global do usuário (e o saldo)
       await refreshUser();
 
       // 3. Feedback de sucesso
       notify.success(`R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} adicionados!`);
 
-      // 4. Redireciona (A Dashboard já estará com o valor novo no cache do React)
-      setTimeout(() => {
-        router.replace("/(drawer)/dashboard");
-      }, 1200);
+      // 4. Redireciona para a Dashboard
+      router.replace("/(drawer)/dashboard");
 
     } catch (error: any) {
-      notify.error(error.response?.data?.message || "Erro ao processar o depósito.");
+      const message = error.response?.data?.message || "Erro ao processar o depósito.";
+      notify.error(message);
     } finally {
       setLoading(false);
     }
@@ -51,11 +62,15 @@ export default function DepositScreen() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+        style={styles.container}
+      >
         <StatusBar style="dark" />
         <View style={styles.content}>
           <View style={styles.card}>
             <Text style={styles.label}>Quanto deseja depositar?</Text>
+            
             <View style={styles.inputWrapper}>
               <Text style={styles.currencySymbol}>R$</Text>
               <TextInput
@@ -75,10 +90,18 @@ export default function DepositScreen() {
               onPress={handleDeposit}
               disabled={loading}
             >
-              {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>Confirmar Depósito</Text>}
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.buttonText}>Confirmar Depósito</Text>
+              )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton} disabled={loading}>
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              style={styles.backButton} 
+              disabled={loading}
+            >
               <Text style={styles.backButtonText}>Cancelar e Voltar</Text>
             </TouchableOpacity>
           </View>
@@ -91,9 +114,26 @@ export default function DepositScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { flex: 1, padding: 24, justifyContent: 'center' },
-  card: { backgroundColor: '#FFF', padding: 30, borderRadius: 24, elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.05, shadowRadius: 15 },
+  card: { 
+    backgroundColor: '#FFF', 
+    padding: 30, 
+    borderRadius: 24, 
+    elevation: 4, 
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 8 }, 
+    shadowOpacity: 0.05, 
+    shadowRadius: 15 
+  },
   label: { fontSize: 16, color: Colors.gray, textAlign: 'center', marginBottom: 20, fontWeight: '600' },
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 40, borderBottomWidth: 2, borderBottomColor: Colors.primary + "15", paddingBottom: 12 },
+  inputWrapper: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 40, 
+    borderBottomWidth: 2, 
+    borderBottomColor: Colors.primary + "15", 
+    paddingBottom: 12 
+  },
   currencySymbol: { fontSize: 24, fontWeight: 'bold', color: Colors.text, marginRight: 10 },
   input: { fontSize: 38, fontWeight: 'bold', color: Colors.primary, minWidth: 120 },
   confirmButton: { backgroundColor: Colors.primary, height: 58, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },

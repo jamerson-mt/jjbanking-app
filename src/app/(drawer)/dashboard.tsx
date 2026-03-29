@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { 
-  ScrollView, 
-  View, 
-  Text, 
-  StyleSheet, 
-  ActivityIndicator, 
-  RefreshControl 
+import {
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 
 import { Colors } from "../../constants/Colors";
 import { useAuth } from "../../context/AuthContext";
@@ -17,28 +16,30 @@ import { BalanceCard } from "../../components/BalanceCard";
 import { QuickAction } from "../../components/QuickAction";
 import { RecentActivity } from "../../components/RecentActivity";
 import { api } from "../../services/api";
-
+// ... (mantenha os imports)
 export default function Dashboard() {
-  const router = useRouter();
-  const { user, isLoading, logout, refreshUser } = useAuth();
-  const [refreshing, setRefreshing] = useState(false);
+  const { user, refreshUser, logout } = useAuth(); // Pegando as funções do contexto
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadTransactions = useCallback(async () => {
     if (!user?.accountId) return;
     try {
-      const response = await api.get(`/transaction/statement/${user.accountId}`);
-      if (response.data && Array.isArray(response.data)) {
-        setTransactions([...response.data].reverse());
-      }
+      const response = await api.get(
+        `/transaction/statement/${user.accountId}`,
+      );
+      const data = response.data || [];
+      setTransactions([...data].reverse());
     } catch (error) {
-      console.error("Erro ao carregar transações:", error);
+      console.error("Erro ao carregar extrato:", error);
     }
   }, [user?.accountId]);
 
   useEffect(() => {
-    loadTransactions();
-  }, [loadTransactions]);
+    if (user?.accountId) {
+      loadTransactions();
+    }
+  }, [loadTransactions, user?.accountId]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -46,24 +47,15 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
+  // FUNÇÃO CORRIGIDA:
   const handleLogout = async () => {
     await logout();
     router.replace("/(auth)/login");
   };
 
-  if (isLoading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -72,22 +64,23 @@ export default function Dashboard() {
           />
         }
       >
-        {/* Ternário para garantir que só renderiza se houver 'user' */}
         {user ? (
           <UserHeader
             name={user.fullName}
             branch={user.branch}
             account={user.accountNumber}
-            onLogout={handleLogout}
+            onLogout={handleLogout} // <--- Agora passa a função certa
           />
         ) : null}
+
+        {/* ... restante do seu layout (BalanceCard, QuickActions, RecentActivity) ... */}
 
         <View style={styles.section}>
           <BalanceCard amount={user?.balance ?? 0} />
         </View>
 
         <Text style={styles.sectionTitle}>Ações rápidas</Text>
-        
+
         <View>
           <ScrollView
             horizontal
@@ -98,13 +91,13 @@ export default function Dashboard() {
               icon="cash-outline"
               label="Depositar"
               color="#28A745"
-              onPress={() => router.push("/deposit")}
+              onPress={() => router.push("/(drawer)/deposit")}
             />
             <QuickAction
               icon="arrow-up-circle-outline"
               label="Transferir"
               color="#FF9500"
-              onPress={() => {}} 
+              onPress={() => router.push("/(drawer)/withdraw")} // Agora com a rota correta e sem erro de sintaxe
             />
           </ScrollView>
         </View>
