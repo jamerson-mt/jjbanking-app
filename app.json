@@ -10,7 +10,6 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "baseUrl": "/jjbanking-app",
       "favicon": "./assets/images/icon.png"
     },
     "ios": {
@@ -37,9 +36,11 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
+      "baseUrl": "/jjbanking-app",
       "typedRoutes": true,
       "reactCompiler": true
     }
