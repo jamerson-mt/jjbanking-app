@@ -15,24 +15,26 @@ import { useAuth } from "../../context/AuthContext";
 import { UserHeader } from "../../components/UserHeader";
 import { BalanceCard } from "../../components/BalanceCard";
 import { QuickAction } from "../../components/QuickAction";
-import { RecentActivity } from "../../components/RecentActivity"; // Importando o novo componente
+import { RecentActivity } from "../../components/RecentActivity";
 import { api } from "../../services/api";
 
 export default function Dashboard() {
   const router = useRouter();
   const { user, isLoading, logout, refreshUser } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
-const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
+
   const loadTransactions = useCallback(async () => {
-  if (!user?.accountId) return;
-  try {
-    const response = await api.get(`/transaction/statement/${user.accountId}`);
-    // Agora o TS aceita pois definimos que o estado aceita um array
-    setTransactions([...response.data].reverse()); 
-  } catch (error) {
-    console.error("Erro ao carregar transações:", error);
-  }
-}, [user?.accountId]);
+    if (!user?.accountId) return;
+    try {
+      const response = await api.get(`/transaction/statement/${user.accountId}`);
+      if (response.data && Array.isArray(response.data)) {
+        setTransactions([...response.data].reverse());
+      }
+    } catch (error) {
+      console.error("Erro ao carregar transações:", error);
+    }
+  }, [user?.accountId]);
 
   useEffect(() => {
     loadTransactions();
@@ -70,40 +72,44 @@ const [transactions, setTransactions] = useState<any[]>([]);
           />
         }
       >
-        <UserHeader
-          name={user?.fullName}
-          branch={user?.branch}
-          account={user?.accountNumber}
-          onLogout={handleLogout}
-        />
+        {/* Ternário para garantir que só renderiza se houver 'user' */}
+        {user ? (
+          <UserHeader
+            name={user.fullName}
+            branch={user.branch}
+            account={user.accountNumber}
+            onLogout={handleLogout}
+          />
+        ) : null}
 
         <View style={styles.section}>
           <BalanceCard amount={user?.balance ?? 0} />
         </View>
 
         <Text style={styles.sectionTitle}>Ações rápidas</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.actionsList}
-        >
-          <QuickAction
-            icon="cash-outline"
-            label="Depositar"
-            color="#28A745"
-            onPress={() => router.push("/deposit")}
-          />
-          <QuickAction
-            icon="arrow-up-circle-outline"
-            label="Transferir"
-            color="#FF9500"
-            onPress={() => {}} // Adicionaremos a rota depois
-          />
-        </ScrollView>
+        
+        <View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.actionsList}
+          >
+            <QuickAction
+              icon="cash-outline"
+              label="Depositar"
+              color="#28A745"
+              onPress={() => router.push("/deposit")}
+            />
+            <QuickAction
+              icon="arrow-up-circle-outline"
+              label="Transferir"
+              color="#FF9500"
+              onPress={() => {}} 
+            />
+          </ScrollView>
+        </View>
 
-        {/* Agora chamamos o componente focado apenas nas transações */}
         <RecentActivity transactions={transactions} />
-
       </ScrollView>
     </SafeAreaView>
   );

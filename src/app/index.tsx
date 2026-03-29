@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 
 import { Colors } from "../constants/Colors";
 import { Button } from "../components/Button";
-import { useAuth } from "../hooks/useAuth"; // Certifique-se que este hook lê o AsyncStorage
+import { useAuth } from "../context/AuthContext"; // Certifique-se que este hook lê o AsyncStorage
 
 export default function Index() {
   const { user, isLoading } = useAuth();

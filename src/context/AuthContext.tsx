@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { api } from "../services/api"; // Ajuste o caminho da sua API
+import { api } from "../services/api";
 
 interface UserData {
   fullName: string;
@@ -27,10 +27,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadStorageData = useCallback(async () => {
     try {
-      const keys = ["@JJBanking:token", "@JJBanking:fullName", "@JJBanking:accountId", "@JJBanking:accountNumber", "@JJBanking:branch", "@JJBanking:balance"];
+      const keys = [
+        "@JJBanking:token",
+        "@JJBanking:fullName",
+        "@JJBanking:accountId",
+        "@JJBanking:accountNumber",
+        "@JJBanking:branch",
+        "@JJBanking:balance"
+      ];
       const storage = await AsyncStorage.multiGet(keys);
       const data: any = {};
-      storage.forEach(([key, value]) => { data[key.split(":")[1]] = value; });
+      
+      storage.forEach(([key, value]) => {
+        const field = key.split(":")[1];
+        data[field] = value;
+      });
 
       if (data.token) {
         setUser({
@@ -42,8 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           balance: parseFloat(data.balance) || 0,
         });
       }
-    } catch (e) { console.error(e); }
-    setIsLoading(false);
+    } catch (e) {
+      console.error("Erro ao carregar storage:", e);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const refreshUser = async () => {
@@ -51,21 +65,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await api.get(`/accounts/${user.accountId}`);
       const newBalance = response.data.balance;
-
       await AsyncStorage.setItem("@JJBanking:balance", String(newBalance));
-      
-      // ATUALIZAÇÃO GLOBAL: Isso força todas as telas (Dashboard inclusive) a atualizarem
-      setUser((prev) => prev ? { ...prev, balance: parseFloat(newBalance) || 0 } : null);
-    } catch (e) { console.error("Erro ao sincronizar:", e); }
+      setUser((prev) => (prev ? { ...prev, balance: parseFloat(newBalance) || 0 } : null));
+    } catch (e) {
+      console.error("Erro ao sincronizar saldo:", e);
+    }
   };
 
   const logout = async () => {
-    await AsyncStorage.clear();
-    setUser(null);
+    try {
+      await AsyncStorage.clear();
+      setUser(null);
+    } catch (e) {
+      console.error("Erro no logout:", e);
+    }
   };
 
-  useEffect(() => { loadStorageData(); }, [loadStorageData]);
+  useEffect(() => {
+    loadStorageData();
+  }, [loadStorageData]);
 
+  // Renderização limpa: evita qualquer fragmento de texto entre as tags
   return (
     <AuthContext.Provider value={{ user, isLoading, refreshUser, logout, setUser }}>
       {children}
