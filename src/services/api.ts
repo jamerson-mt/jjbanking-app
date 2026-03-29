@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://jjbanking.exibba.site/api",
+  baseURL: "http://10.0.0.9:5000/api",
   timeout: 13000,
   headers: {
     "Content-Type": "application/json",

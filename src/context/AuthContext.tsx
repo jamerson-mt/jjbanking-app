@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { notify } from "../utils/toast";
-import { api } from "../services/api"; // Importe sua instância do Axios
+import { api } from "../services/api"; // Ajuste o caminho da sua API
 
 interface UserData {
   fullName: string;
@@ -12,13 +11,22 @@ interface UserData {
   token: string;
 }
 
-export function useAuth() {
+interface AuthContextData {
+  user: UserData | null;
+  isLoading: boolean;
+  refreshUser: () => Promise<void>;
+  logout: () => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
+}
+
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadStorageData = useCallback(async () => {
     try {
-      setIsLoading(true);
       const keys = ["@JJBanking:token", "@JJBanking:fullName", "@JJBanking:accountId", "@JJBanking:accountNumber", "@JJBanking:branch", "@JJBanking:balance"];
       const storage = await AsyncStorage.multiGet(keys);
       const data: any = {};
@@ -34,41 +42,35 @@ export function useAuth() {
           balance: parseFloat(data.balance) || 0,
         });
       }
-    } catch (error) {
-      console.error("Erro ao carregar sessão:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (e) { console.error(e); }
+    setIsLoading(false);
   }, []);
 
-  // FUNÇÃO REVISADA: Sincroniza com a API e força atualização da UI
   const refreshUser = async () => {
     if (!user?.accountId) return;
     try {
-      // Ajuste a rota para a sua API (ex: /accounts/{id} ou /users/me)
       const response = await api.get(`/accounts/${user.accountId}`);
       const newBalance = response.data.balance;
 
-      // 1. Atualiza o banco local
       await AsyncStorage.setItem("@JJBanking:balance", String(newBalance));
+      
+      // ATUALIZAÇÃO GLOBAL: Isso força todas as telas (Dashboard inclusive) a atualizarem
+      setUser((prev) => prev ? { ...prev, balance: parseFloat(newBalance) || 0 } : null);
+    } catch (e) { console.error("Erro ao sincronizar:", e); }
+  };
 
-      // 2. Atualiza o Estado Global criando um NOVO OBJETO (Imutabilidade)
-      setUser((prev) => {
-        if (!prev) return null;
-        return { ...prev, balance: parseFloat(newBalance) || 0 };
-      });
-    } catch (error) {
-      console.error("Erro ao sincronizar saldo:", error);
-    }
+  const logout = async () => {
+    await AsyncStorage.clear();
+    setUser(null);
   };
 
   useEffect(() => { loadStorageData(); }, [loadStorageData]);
 
-  const logout = async () => {
-    await AsyncStorage.multiRemove(["@JJBanking:token", "@JJBanking:fullName", "@JJBanking:accountId", "@JJBanking:accountNumber", "@JJBanking:branch", "@JJBanking:balance"]);
-    setUser(null);
-    notify.info("Sessão encerrada.");
-  };
+  return (
+    <AuthContext.Provider value={{ user, isLoading, refreshUser, logout, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-  return { user, isLoading, logout, isLoggedIn: !!user?.token, refreshUser };
-}
+export const useAuth = () => useContext(AuthContext);

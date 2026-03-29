@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../constants/Colors";
@@ -17,13 +18,17 @@ export const UserHeader = ({ name, branch, account, onLogout }: UserHeaderProps)
       <View>
         <Text style={styles.greeting}>Olá, {firstName}</Text>
         <Text style={styles.accountInfo}>
-          Agência {branch} • Conta {account}
+          Agência {branch || "0001"} • Conta {account || "00000-0"}
         </Text>
       </View>
       
       {onLogout && (
-        <TouchableOpacity onPress={onLogout} style={styles.logoutButton} activeOpacity={0.7}>
-          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+        <TouchableOpacity 
+          onPress={onLogout} 
+          style={styles.logoutButton} 
+          activeOpacity={0.7}
+        >
+          <Ionicons name="log-out-outline" size={26} color="#FF3B30" />
         </TouchableOpacity>
       )}
     </View>
@@ -36,9 +41,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 30,
+    paddingTop: 30, // Espaçamento para não colar no topo
+    paddingBottom: 20,
   },
   greeting: { fontSize: 22, fontWeight: "bold", color: Colors.text },
-  accountInfo: { fontSize: 14, color: Colors.gray, marginTop: 2 },
-  logoutButton: { padding: 8 },
+  accountInfo: { fontSize: 14, color: Colors.gray, marginTop: 4 },
+  logoutButton: { 
+    padding: 10,
+    backgroundColor: "#FF3B3010", // Fundo levemente avermelhado
+    borderRadius: 12 
+  },
 });

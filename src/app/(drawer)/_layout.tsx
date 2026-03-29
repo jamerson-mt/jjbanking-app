@@ -1,6 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import { Colors } from "../../constants/Colors";
-import { Platform, TouchableOpacity } from "react-native";
+import {  TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 
@@ -31,6 +31,16 @@ export default function DrawerLayout() {
           title: "JJ Banking",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="deposit"
+        options={{
+          drawerLabel: "Adicionar Dinheiro",
+          title: "Depósito",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="add-circle-outline" size={size} color={color} />
           ),
         }}
       />
