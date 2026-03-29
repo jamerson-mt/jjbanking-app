@@ -1,42 +1,55 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../constants/Colors';
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Colors } from "../constants/Colors";
 
-interface BalanceProps {
+interface BalanceCardProps {
   amount: number;
 }
 
-export function BalanceCard({ amount }: BalanceProps) {
+export const BalanceCard = ({ amount }: BalanceCardProps) => {
+  const [isVisible, setIsVisible] = useState(true);
+
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>Saldo disponível</Text>
+      <View style={styles.header}>
+        <Text style={styles.label}>Saldo disponível</Text>
+        <TouchableOpacity onPress={() => setIsVisible(!isVisible)}>
+          <Ionicons 
+            name={isVisible ? "eye-outline" : "eye-off-outline"} 
+            size={22} 
+            color={Colors.primary} 
+          />
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.amount}>
-        R$ {amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+        {isVisible 
+          ? `R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+          : "••••••••"}
       </Text>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.white,
+    backgroundColor: "#FFF",
     padding: 20,
-    borderRadius: 16,
-    width: '100%',
-    elevation: 4,
-    shadowColor: '#000',
+    borderRadius: 24,
+    // Sombra leve para destacar no fundo cinza
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  label: {
-    color: Colors.gray,
-    fontSize: 14,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
-  amount: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.text,
-  },
+  label: { fontSize: 14, color: Colors.gray, fontWeight: "500" },
+  amount: { fontSize: 28, fontWeight: "bold", color: Colors.text },
 });
