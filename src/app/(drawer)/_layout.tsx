@@ -1,21 +1,18 @@
 import { Drawer } from "expo-router/drawer";
 import { Colors } from "../../constants/Colors";
-import {  TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 
 export default function DrawerLayout() {
   return (
     <Drawer
-      // Usamos uma função aqui para ganhar acesso ao objeto 'navigation' nativo
       screenOptions={({ navigation }) => ({
         headerShown: true,
         headerTintColor: Colors.primary,
         drawerActiveTintColor: Colors.primary,
-
         headerLeft: () => (
           <TouchableOpacity
-            // DrawerActions.openDrawer() é a forma mais segura de disparar o evento
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
             style={{ marginLeft: 15 }}
           >
@@ -34,6 +31,7 @@ export default function DrawerLayout() {
           ),
         }}
       />
+      
       <Drawer.Screen
         name="deposit"
         options={{
@@ -41,6 +39,19 @@ export default function DrawerLayout() {
           title: "Depósito",
           drawerIcon: ({ color, size }) => (
             <Ionicons name="add-circle-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+
+      {/* Novo item: Saque */}
+      <Drawer.Screen
+        name="transfer"
+        options={{
+          drawerLabel: "transferir Dinheiro",
+          title: "transfer",
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="cash-outline" size={size} color={color} />
           ),
         }}
       />

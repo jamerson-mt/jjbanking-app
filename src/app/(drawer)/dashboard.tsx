@@ -97,7 +97,7 @@ export default function Dashboard() {
               icon="arrow-up-circle-outline"
               label="Transferir"
               color="#FF9500"
-              onPress={() => router.push("/(drawer)/withdraw")} // Agora com a rota correta e sem erro de sintaxe
+              onPress={() => router.push("/(drawer)/transfer")} // Agora com a rota correta e sem erro de sintaxe
             />
           </ScrollView>
         </View>
@@ -109,7 +109,7 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+  container: { flex: 1, backgroundColor: Colors.background, paddingTop:20 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   scrollContent: { paddingBottom: 20 },
   section: { paddingHorizontal: 24, marginBottom: 25 },
